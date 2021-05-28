@@ -13,7 +13,7 @@ Any agent can access any customer ticket.
 Expectations:
 Any agent should be able to create tickets.
 For agent response, email should be triggered.
-Agen should be assigned automatically(should be evenly distributed).
+Agent should be assigned automatically(should be evenly distributed).
 
 
 API's collection link: https://www.getpostman.com/collections/b607f2466d6f5addfea1

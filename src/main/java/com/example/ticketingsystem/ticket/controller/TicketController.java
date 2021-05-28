@@ -49,6 +49,7 @@ public class TicketController {
         ticket.setCreatedBy(commonUtil.getUserName());
         ticket.setDefaultPriority();
         ticket.setDefaultStatus();
+        ticket.setAssignedTo(userRepository.findAssignedTo().getUserName());
         ticketRepository.save(ticket);
         return  ticket;
     }

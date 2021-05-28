@@ -11,4 +11,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "SELECT * FROM USER WHERE USER_NAME=:userName limit 1", nativeQuery = true)
     User findByUserName(@Param("userName") String userName);
+
+    @Query(value = "SELECT * FROM user where user.role=1 ORDER BY RAND() LIMIT 1", nativeQuery = true)
+    User findAssignedTo();
 }
