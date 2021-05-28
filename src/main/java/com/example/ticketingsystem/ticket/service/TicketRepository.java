@@ -20,6 +20,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     @Query(value = "SELECT * FROM ticket WHERE ticket.status=:value", nativeQuery = true)
     List<Ticket> findAllByStatus(@Param("value") Integer value);
 
-    @Query(value = "SELECT * FROM ticket WHERE ticket.status=:value and ticket.resolved_at<DATEADD(month,-1,getdate())", nativeQuery = true)
-    List<Ticket> findAllByStatusBeforeAMonth(@Param("value") Integer value);
+    @Query(value = "SELECT * FROM ticket WHERE ticket.status=:value and ticket.resolved_at<DATEADD(DAY, 1, :date)", nativeQuery = true)
+    List<Ticket> findAllByStatusBeforeAMonth(@Param("value") Integer value, @Param("date") String date);
 }

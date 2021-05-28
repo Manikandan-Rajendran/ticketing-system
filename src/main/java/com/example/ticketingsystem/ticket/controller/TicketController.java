@@ -32,18 +32,21 @@ public class TicketController {
 
 
     @PostMapping("/ticket")
-    public Ticket create(@NotNull @RequestHeader("Authorization") String authenticationDetails, @Valid @RequestBody Ticket ticket) throws IllegalAccessException {
+    public ResponseEntity<CommonResponseModel> create(@NotNull @RequestHeader("Authorization") String authenticationDetails, @Valid @RequestBody Ticket ticket) throws IllegalAccessException {
         CommonUtil commonUtil = new CommonUtil(authenticationDetails);
+        CommonResponseModel commonResponseModel = new CommonResponseModel();
         User user = userRepository.findByUserName(commonUtil.getUserName());
         if(user==null || !user.passwordMatch(commonUtil.getPassword())){
-            throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid session");
+            commonResponseModel.setResponseMessage("Invalid session");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.FORBIDDEN);
         }
         if(user.isCustomer()){
             ticket.setCustomer(user.getName());
             ticket.setCustomerMailId(user.getMailId());
         }else{
             if(ticket.getCustomer()==null ||  ticket.getCustomerMailId()==null){
-                throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "Customer info not found");
+                commonResponseModel.setResponseMessage("Customer info not found");
+                return new ResponseEntity<>(commonResponseModel, HttpStatus.BAD_REQUEST);
             }
         }
         ticket.setCreatedBy(commonUtil.getUserName());
@@ -51,39 +54,50 @@ public class TicketController {
         ticket.setDefaultStatus();
         ticket.setAssignedTo(userRepository.findAssignedTo().getUserName());
         ticketRepository.save(ticket);
-        return  ticket;
+        commonResponseModel.setResponse(ticket);
+        return new ResponseEntity<>(commonResponseModel, HttpStatus.OK);
     }
 
     @GetMapping("/ticket/{id}")
-    public Ticket getTicket(@NotNull @RequestHeader("Authorization") String authenticationDetails, @PathVariable long id) throws IllegalAccessException {
+    public ResponseEntity<CommonResponseModel> getTicket(@NotNull @RequestHeader("Authorization") String authenticationDetails, @PathVariable long id) throws IllegalAccessException {
         CommonUtil commonUtil = new CommonUtil(authenticationDetails);
         User user = userRepository.findByUserName(commonUtil.getUserName());
+        CommonResponseModel commonResponseModel = new CommonResponseModel();
         if(user==null || !user.passwordMatch(commonUtil.getPassword())){
-            throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid session");
+            commonResponseModel.setResponseMessage("Invalid session");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.FORBIDDEN);
         }
         Optional<Ticket> OptionalTicket = ticketRepository.findById(id);
         if( !OptionalTicket.isPresent()){
-            throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "Ticket not found");
+            commonResponseModel.setResponseMessage("Ticket not found");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.NOT_FOUND);
         }
         Ticket ticket = OptionalTicket.get();
         if (user.isCustomer() && ticket.getCustomer()!= user.getName()) {
-            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authorized");
+            commonResponseModel.setResponseMessage("User not authorized");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.UNAUTHORIZED);
         }
-        return  ticket;
+        commonResponseModel.setResponse(ticket);
+        return new ResponseEntity<>(commonResponseModel, HttpStatus.OK);
     }
 
     @GetMapping("/tickets")
-    public List<Ticket> getTickets(@NotNull @RequestHeader("Authorization") String authenticationDetails, @RequestParam(name = "filterBy", required = false, defaultValue = "") String filterBy, @RequestParam(name="value", required = false) String value) {
+    public ResponseEntity<CommonResponseModel> getTickets(@NotNull @RequestHeader("Authorization") String authenticationDetails, @RequestParam(name = "filterBy", required = false, defaultValue = "") String filterBy, @RequestParam(name="value", required = false) String value) {
         CommonUtil commonUtil = new CommonUtil(authenticationDetails);
         User user = userRepository.findByUserName(commonUtil.getUserName());
+        CommonResponseModel commonResponseModel = new CommonResponseModel();
         if(user==null || !user.passwordMatch(commonUtil.getPassword())){
-            throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid session");
+            commonResponseModel.setResponseMessage("Invalid session");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.FORBIDDEN);
         }
         if (user.isCustomer()){
-            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authorized");
+            commonResponseModel.setResponseMessage("User not authorized");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.UNAUTHORIZED);
         }
-        if(filterBy.isEmpty())
-            return ticketRepository.findAll();
+        if(filterBy.isEmpty()) {
+            commonResponseModel.setResponses(ticketRepository.findAll());
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.OK);
+        }
         else
         {
             List<Ticket> tickets = null;
@@ -98,9 +112,11 @@ public class TicketController {
                     tickets = ticketRepository.findAllByStatus(Status.valueOf(value.toUpperCase()).getValue());
                     break;
                 default:
-                    throw  new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid filter");
+                    commonResponseModel.setResponseMessage("Invalid filter");
+                    return new ResponseEntity<>(commonResponseModel, HttpStatus.BAD_REQUEST);
             }
-            return tickets;
+            commonResponseModel.setResponses(tickets);
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.OK);
         }
     }
 
@@ -108,18 +124,21 @@ public class TicketController {
     public ResponseEntity<CommonResponseModel> deleteTicket(@NotNull @RequestHeader("Authorization") String authenticationDetails, @PathVariable long id) {
         CommonUtil commonUtil = new CommonUtil(authenticationDetails);
         User user = userRepository.findByUserName(commonUtil.getUserName());
+        CommonResponseModel commonResponseModel = new CommonResponseModel();
         if(user==null || !user.passwordMatch(commonUtil.getPassword())){
-            throw  new ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid session");
+            commonResponseModel.setResponseMessage("Invalid session");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.FORBIDDEN);
         }
         if (user.isCustomer()){
-            throw  new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not authorized");
+            commonResponseModel.setResponseMessage("User not authorized");
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.UNAUTHORIZED);
         }
         try{
         ticketRepository.deleteById(id);}
         catch (EmptyResultDataAccessException e){
-            throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "No ticket for id: "+id);
+            commonResponseModel.setResponseMessage("No ticket for id: "+id);
+            return new ResponseEntity<>(commonResponseModel, HttpStatus.NOT_FOUND);
         }
-        CommonResponseModel commonResponseModel = new CommonResponseModel();
         commonResponseModel.setResponseMessage("Ticket deleted Successfully");
         return new ResponseEntity<>(commonResponseModel, HttpStatus.OK);
     }

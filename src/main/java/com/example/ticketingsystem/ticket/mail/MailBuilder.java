@@ -10,7 +10,7 @@ public class MailBuilder {
     private String sendGridAPIKey = "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";
 
 //    @Value("${mail.sendgrid.sender_mail_id}")
-    private String senderMailId = "donotreply@mail.com";
+    private String senderMailId = "yogesh@sinecycle.com";
 
     private Email from;
 

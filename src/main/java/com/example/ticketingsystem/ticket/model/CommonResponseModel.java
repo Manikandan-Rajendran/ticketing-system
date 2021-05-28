@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 @NoArgsConstructor
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -18,4 +20,7 @@ public class CommonResponseModel {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private Object response;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private List<Ticket> responses;
 }
