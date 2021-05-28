@@ -1,4 +1,4 @@
-package com.example.ticketingsystem.user;
+package com.example.ticketingsystem.user.enums;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

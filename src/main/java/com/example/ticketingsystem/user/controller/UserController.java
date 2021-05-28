@@ -1,5 +1,7 @@
-package com.example.ticketingsystem.user;
+package com.example.ticketingsystem.user.controller;
 
+import com.example.ticketingsystem.user.model.User;
+import com.example.ticketingsystem.user.service.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -1,22 +1,46 @@
 package com.example.ticketingsystem.ticket.response;
 
+import com.example.ticketingsystem.ticket.model.Ticket;
+import com.example.ticketingsystem.ticket.listeners.MailJPALisener;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Data
 @Entity
 @Table
+@NoArgsConstructor
+@AllArgsConstructor
+@EntityListeners(value = {MailJPALisener.class})
 public class Response {
 
     @Id
     @GeneratedValue
     private long id;
 
+    @NotNull
+    @JsonProperty(value = "content")
     private String content;
 
-    private String author;
+    @Override
+    public String toString() {
+        return "Response{" +
+                "id=" + id +
+                ", content='" + content + '\'' +
+                ", user='" + user + '\'' +
+                '}';
+    }
+
+    @JsonProperty(value = "user")
+    private String user;
+
+    @JsonBackReference
+    @ManyToOne(fetch = FetchType.EAGER, optional = false, cascade=CascadeType.ALL)
+    @JoinColumn(name = "ticket_id", insertable = true, updatable = true)
+    private Ticket ticket;
 }

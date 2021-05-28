@@ -1,12 +1,11 @@
-package com.example.ticketingsystem.user;
+package com.example.ticketingsystem.user.model;
 
+import com.example.ticketingsystem.user.enums.Role;
 import lombok.Data;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.Email;
 
 @Entity
 @Table
@@ -60,9 +59,13 @@ public class User {
 
     private String Name;
 
+    @Column(unique=true)
     private String userName;
 
     private String password;
+
+    @Email
+    private String mailId;
 
     public boolean isCustomer() {
         if(this.role == Role.CUSTOMER)
